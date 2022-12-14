@@ -3,8 +3,7 @@
 void v1(FILE *, FILE *);
 void v2(FILE *);
 int rec(FILE *, FILE *, int, char, int);
-int isone(FILE *);
-int getfirst(FILE *);
+
 
 int ctoint(char a)
 {
@@ -38,37 +37,48 @@ void v1(FILE *f1, FILE *f2)
         printf("result: %d\n\n\n", res);
         sum += (i + 1) * res;
 
-        tmp = ' ';
-        while (tmp != '\n')
-            fscanf(f1, "%c", &tmp);
-
-        tmp = ' ';
-        while (tmp != '\n')
-            fscanf(f2, "%c", &tmp);
-        tmp = ' ';
-
-        // advance two lines
-        while (tmp != '\n')
+        for (int j = 0; j < 3; j++) //line advancements
         {
-            fscanf(f1, "%c", &tmp);
+            tmp = ' ';
+            while (tmp != '\n')
+                fscanf(f1, "%c", &tmp);
+
+            tmp = ' ';
+            while (tmp != '\n')
+                fscanf(f2, "%c", &tmp);
         }
-        tmp = ' ';
-        while (tmp != '\n')
-        {
-            fscanf(f2, "%c", &tmp);
-        }
+    }
+    printf("Sum: %d\n", sum);
+}
 
-        tmp = ' ';
 
-        // advance two lines
-        while (tmp != '\n')
+void v1(FILE *f1, FILE *f2)
+{
+    int sum = 0;
+    char tmp = ' ';
+    while (tmp != '\n')
+    {
+        fscanf(f2, "%c", &tmp);
+    }
+    for (int i = 0; i < 150; i++)
+    {
+
+        fscanf(f1, "%c", &tmp); // jump over first [
+        fscanf(f2, "%c", &tmp);
+
+        int res = rec(f1, f2, 0, ' ', 0);
+        printf("result: %d\n\n\n", res);
+        sum += (i + 1) * res;
+
+        for (int j = 0; j < 3; j++) //line advancements
         {
-            fscanf(f1, "%c", &tmp);
-        }
-        tmp = ' ';
-        while (tmp != '\n')
-        {
-            fscanf(f2, "%c", &tmp);
+            tmp = ' ';
+            while (tmp != '\n')
+                fscanf(f1, "%c", &tmp);
+
+            tmp = ' ';
+            while (tmp != '\n')
+                fscanf(f2, "%c", &tmp);
         }
     }
     printf("Sum: %d\n", sum);
@@ -134,8 +144,6 @@ int rec(FILE *f1, FILE *f2, int of, char in, int reuse)
         {
             printf("Int List\n");
 
-            // advance right
-
             ret = rec(f1, f2, 10, curl, 1);
         }
 
@@ -143,9 +151,6 @@ int rec(FILE *f1, FILE *f2, int of, char in, int reuse)
         if ((curl == '[') && (curr >= '0' && curr <= '9'))
         {
             printf("list Int\n");
-
-            // advance left
-            // fscanf(f1, "%c", &curl);
 
             ret = rec(f1, f2, -10, curr, 2);
         }
