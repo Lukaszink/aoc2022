@@ -4,7 +4,6 @@ void v1(FILE *, FILE *);
 void v2(FILE *);
 int rec(FILE *, FILE *, int, char, int);
 
-
 int ctoint(char a)
 {
     return (a - '0');
@@ -15,7 +14,7 @@ int main()
     FILE *fp = fopen("in13.txt", "r");
     FILE *fp2 = fopen("in13.txt", "r");
 
-    v1(fp, fp2);
+    v2(fp);
     // v2(fp);
 }
 
@@ -37,7 +36,7 @@ void v1(FILE *f1, FILE *f2)
         printf("result: %d\n\n\n", res);
         sum += (i + 1) * res;
 
-        for (int j = 0; j < 3; j++) //line advancements
+        for (int j = 0; j < 3; j++) // line advancements
         {
             tmp = ' ';
             while (tmp != '\n')
@@ -51,37 +50,43 @@ void v1(FILE *f1, FILE *f2)
     printf("Sum: %d\n", sum);
 }
 
-
-void v1(FILE *f1, FILE *f2)
+void v2(FILE *f1)
 {
     int sum = 0;
     char tmp = ' ';
-    while (tmp != '\n')
-    {
-        fscanf(f2, "%c", &tmp);
-    }
+
     for (int i = 0; i < 150; i++)
     {
 
+        FILE *f2 = fopen("helper.txt", "r");
         fscanf(f1, "%c", &tmp); // jump over first [
         fscanf(f2, "%c", &tmp);
 
         int res = rec(f1, f2, 0, ' ', 0);
         printf("result: %d\n\n\n", res);
-        sum += (i + 1) * res;
+        sum += res;
 
-        for (int j = 0; j < 3; j++) //line advancements
+        // line advancements
+
+        tmp = ' ';
+        while (tmp != '\n')
+            fscanf(f1, "%c", &tmp);
+
+        f2 = fopen("helper.txt", "r");
+
+        res = rec(f1, f2, 0, ' ', 0);
+
+        printf("result: %d\n\n\n", res);
+        sum += res;
+
+        for (int j = 0; j < 2; j++) // line advancements
         {
             tmp = ' ';
             while (tmp != '\n')
                 fscanf(f1, "%c", &tmp);
-
-            tmp = ' ';
-            while (tmp != '\n')
-                fscanf(f2, "%c", &tmp);
         }
     }
-    printf("Sum: %d\n", sum);
+    printf("Sum: %d\n", sum + 1);
 }
 
 int rec(FILE *f1, FILE *f2, int of, char in, int reuse)
