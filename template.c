@@ -76,9 +76,29 @@ void printlist(struct node *start)
     printf("%d %d\n", cur->key, cur->data);
 }
 
+int mapint(struct node *start, int i)
+{
+    struct node *cur = start;
+    while (cur->next != NULL)
+    {
+        if (cur->data == i)
+        {
+            return cur->key;
+        }
+        cur = cur->next;
+    }
+    if (cur->data == i)
+    {
+        return cur->key;
+    }
 
-
-
+    struct node *ne = (struct node *)malloc(sizeof(struct node));
+    ne->key = cur->key + 1;
+    ne->data = i;
+    ne->next = NULL;
+    cur->next = ne;
+    return ne->key;
+}
 
 void v1(FILE *f)
 {
