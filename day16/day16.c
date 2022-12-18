@@ -93,7 +93,7 @@ int mapint(struct node *start, int i)
 }
 int main()
 {
-    FILE *fp = fopen("test.txt", "r");
+    FILE *fp = fopen("in16.txt", "r");
     // FILE *fp2 = fopen("input2.txt", "r");
 
     v1(fp);
@@ -156,9 +156,9 @@ void v1(FILE *f)
     int usedvalves[100][100][31]; // pos valveto iteration
     int score[100][31];
 
-    score[mapint(map, 0)][0] = 1000000; //start at valve AA
+    score[mapint(map, 0)][0] = 1000000; // start at valve AA
 
-    int globalmax=0;
+    int globalmax = 0;
 
     for (int it = 1; it < 31; it++)
     {
@@ -166,18 +166,18 @@ void v1(FILE *f)
         {
             int tmpmax = 0;
 
+            for (int c = 0; c < 100; c++)
+                usedvalves[po][c][it] = usedvalves[po][c][it - 1];
+
             if (usedvalves[po][po][it - 1] == 0)
             { // open valve
                 score[po][it] = score[po][it - 1] + (30 - it) * flows[po];
+                usedvalves[po][po][it] = 1;
             }
             else
             {
                 score[po][it] = score[po][it - 1];
             }
-
-            for (int c = 0; c < 100; c++)
-                usedvalves[po][c][it] = usedvalves[po][c][it - 1];
-            usedvalves[po][po][it] = 1;
 
             for (int i = 0; i < 100; i++)
             {
