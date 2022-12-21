@@ -1,14 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-struct ArrayStr
-{
-    int arr[100];
-};
-
 void v1(FILE *);
 void v2(FILE *);
-int recu(int, int, int, int[100][100], struct ArrayStr);
+int recu(int, int, int[1000][1000]);
 
 int ctoint(char a)
 {
@@ -95,7 +89,6 @@ int mapint(struct node *start, int i)
     ne->data = i;
     ne->next = NULL;
     cur->next = ne;
-    printf("map %d to %d\n", i, ne->key);
     return ne->key;
 }
 int main()
@@ -143,6 +136,8 @@ void v1(FILE *f)
         }
 
         pos = mapint(map, (ctoint(fst) * 30 + ctoint(snd)));
+        printf("\n");
+        printf("From %c%c\n", fst, snd);
         flows[pos] = flowr;
         tmp = '.';
 
@@ -152,107 +147,61 @@ void v1(FILE *f)
             fscanf(f, " %c%c%c", &fst, &snd, &tmp);
 
             tmppos = mapint(map, (ctoint(fst) * 30 + ctoint(snd)));
-            // printf("Add connect %d to %c%c: %d\n", pos, fst, snd, tmppos);
+            printf("Add connect %d to %c%c: %d\n", pos, fst, snd, tmppos);
 
             valves[pos][tmppos] = 1;
         }
     }
 
-    for (int i = 0; i < 20; i++)
+    int usedvalves[100][100][31]; // pos valveto iteration
+    int score[100][31];
+
+    score[mapint(map, 0)][0] = 1000000; // start at valve AA
+
+    int globalmax = 0;
+
+    for (int it = 1; it < 31; it++)
     {
-        for (int j = 0; j < 20; j++)
+        for (int po = 0; po < 100; po++) // find max val of all pos in round it
         {
-            printf("%d ", valves[i][j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
+            int tmpmax = 0;
 
-    // // skip valves with flow = 0
-    // for (int curv = 0; curv < 100; curv++)
-    // {
-    //     if (flows[curv] == 0 && curv != mapint(map, 0))
-    //     { // for all valves check if flow = 0
-    //         for (int i = 0; i < 100; i++)
-    //         {
-    //             for (int j = 0; j < 100; j++)
-    //             {
-    //                 if (valves[i][curv] > 0 && valves[curv][j] > 0)
-    //                 {
-    //                     valves[i][j] = valves[curv][j] + 1; // add neighbours to predecessor
-    //                 }
-    //                 if (j == 99)
-    //                 {
-    //                     valves[i][curv] = 0; // set all paths of this valve to 0
-    //                 }
-    //                 if (i == 99)
-    //                     valves[curv][j] = 0; // set all paths from this valve to 0 (not necessary)
-    //             }
-    //         }
-    //     }
-    // }
-    for (int i = 0; i < 100; i++)
-    {
-        valves[i][i] = 0;
-    }
+            for (int c = 0; c < 100; c++)
+                usedvalves[po][c][it] = usedvalves[po][c][it - 1];
 
-    for (int i = 0; i < 10; i++)
-    {
-        for (int j = 0; j < 10; j++)
-        {
-            printf("%d ", valves[i][j]);
-        }
-        printf("\n");
-    }
-    int nrunopened;
-    struct ArrayStr used;
-    for (int i = 0; i < 100; i++)
-    {
-        used.arr[i] = flows[i];
-        if (flows[i] > 0)
-            nrunopened++;
-    }
-    printf("Start it at node %d with nr unopened = %d\n", mapint(map, 0), nrunopened);
+            if (usedvalves[po][po][it - 1] == 0)
+            { // open valve
+                score[po][it] = score[po][it - 1] + (30 - it) * flows[po];
+                usedvalves[po][po][it] = 1;
+            }
+            else
+            {
+                score[po][it] = score[po][it - 1];
+            }
 
-    int out = recu(1, mapint(map, 0), nrunopened, valves, used);
-    printf("Out: %d \n", out);
-}
+            for (int i = 0; i < 100; i++)
+            {
+                tmpmax = 0;
 
-int recu(int iter, int cur, int nruop, int valv[100][100], struct ArrayStr avialflowr)
-{
-    int max = 0;
+                if (valves[i][po] == 1) // if edge from valve i to this po
+                {
 
-    if (iter == 30)
-        return 0;
+                    tmpmax = score[i][it - 1];
+                }
 
-    if (nruop == 0)
-        return 0;
-
-    struct ArrayStr newfr;
-    for (int i = 0; i < 100; i++)
-    {
-        newfr.arr[i] = avialflowr.arr[i];
-    }
-
-    if (avialflowr.arr[cur] != 0)
-    {
-        int curflow = avialflowr.arr[cur];
-        newfr.arr[cur] = 0;
-
-        max = avialflowr.arr[cur] * (30 - iter) + recu(iter + 1, cur, nruop - 1, valv, newfr);
-
-        newfr.arr[cur] = curflow;
-    }
-    for (int next = 0; next < 100; next++)
-    {
-        if (valv[cur][next] > 0 && valv[cur][next] + iter <= 30)
-        {
-            int tmp = recu(iter + valv[cur][next], next, nruop, valv, newfr);
-            if (tmp > max)
-                max = tmp;
+                if (tmpmax > score[po][it]) // check if other valve score is better
+                {
+                    for (int c = 0; c < 100; c++)
+                        usedvalves[po][c][it] = usedvalves[i][c][it - 1]; // copy used valves
+                    score[po][it] = tmpmax;
+                }
+            }
+            if (globalmax < score[po][it])
+                globalmax = score[po][it];
         }
     }
-    return max;
+
+    printf("Out %d\n", globalmax - 1000000);
 }
 
 void v2(FILE *f)
